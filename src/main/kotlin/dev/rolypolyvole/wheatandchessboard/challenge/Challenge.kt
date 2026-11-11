@@ -3,7 +3,6 @@ package dev.rolypolyvole.wheatandchessboard.challenge
 import dev.rolypolyvole.wheatandchessboard.api.ChallengeEvents
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import dev.rolypolyvole.wheatandchessboard.config.Quota
-import net.minecraft.core.component.DataComponents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.ItemEntity
@@ -128,7 +127,7 @@ object Challenge {
 
     fun onInventoryChange(player: ServerPlayer, stack: ItemStack) {
         if (!state.active) return
-        if (stack.item !== ModConfig.item && !stack.has(DataComponents.CONTAINER)) return
+        if (stack.item !== ModConfig.item) return
 
         pendingScans += player.uuid
     }
