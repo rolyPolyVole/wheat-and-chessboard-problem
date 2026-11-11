@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Kotlin
+.kotlin/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Minecraft run directories
+run/
+runs/
+
+# Logs and crash dumps
+*.log
+hs_err_pid*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+
+# Claude
+CLAUDE.md

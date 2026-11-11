@@ -1,0 +1,22 @@
+{
+    "schemaVersion": 1,
+    "id": "wheat_and_chessboard",
+    "version": "${version}",
+    "name": "Wheat and Chessboard Problem",
+    "description": "Fabric mod that adds a daily collecting challenge for every player, which increases in difficulty every day.",
+    "authors": ["rolyPolyVole"],
+    "contact": {},
+    "license": "GPL-3.0",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "dev.rolypolyvole.wheatandchessboard.WheatAndChessboardMod"
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "fabric-language-kotlin": ">=${kotlin_loader_version}",
+        "fabric-api": "*",
+        "minecraft": "${minecraft_version}"
+    }
+}
