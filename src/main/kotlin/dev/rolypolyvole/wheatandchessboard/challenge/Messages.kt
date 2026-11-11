@@ -5,12 +5,11 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import java.math.BigInteger
 
 object Messages {
     private fun itemName(): Component {
-        return ItemStack(ModConfig.config.resolveItem() ?: Items.WHEAT).itemName
+        return ItemStack(ModConfig.item).itemName
     }
 
     private fun text(text: String, color: ChatFormatting): MutableComponent {

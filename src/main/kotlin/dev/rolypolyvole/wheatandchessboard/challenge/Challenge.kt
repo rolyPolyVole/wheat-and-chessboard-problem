@@ -3,18 +3,24 @@ package dev.rolypolyvole.wheatandchessboard.challenge
 import dev.rolypolyvole.wheatandchessboard.api.ChallengeEvents
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import dev.rolypolyvole.wheatandchessboard.config.Quota
+import net.minecraft.core.component.DataComponents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.item.ItemStack
 import java.math.BigInteger
+import java.util.UUID
 
 @Suppress("UselessCallOnNotNull")
 object Challenge {
     private const val SAVE_INTERVAL_TICKS = 600
+    private const val DIRTY_SAVE_INTERVAL_TICKS = 20
     private const val MAX_TICK_MILLIS = 1000L
 
     var state = ChallengeState()
         private set
 
+    private val pendingScans = LinkedHashSet<UUID>()
     private var lastTickMillis = 0L
     private var ticks = 0
     private var dirty = false
@@ -27,6 +33,7 @@ object Challenge {
 
     fun load(server: MinecraftServer) {
         state = StateStorage.load(server)
+        pendingScans.clear()
         lastTickMillis = 0
         dirty = false
     }
@@ -71,6 +78,7 @@ object Challenge {
             state.players[player.uuid] = PlayerProgress(player.plainTextName)
         }
 
+        collect(player)
         save(server)
         return true
     }
@@ -93,7 +101,48 @@ object Challenge {
         progress.name = player.plainTextName
 
         if (!state.active || progress.eliminated) return
+
+        collect(player)
         player.sendSystemMessage(Messages.status(state.day, ModConfig.config.totalDays, progress.collected, quota, timeLeftMillis))
+    }
+
+    fun onPickup(player: ServerPlayer, entity: ItemEntity) {
+        val progress = pendingProgress(player) ?: return
+        val stack = entity.item
+        if (stack.item !== ModConfig.item) return
+
+        val count = stack.count
+        val amount = (quota - progress.collected).min(BigInteger.valueOf(count.toLong())).toInt()
+        if (amount <= 0) return
+
+        player.take(entity, amount)
+
+        if (amount == count) {
+            entity.discard()
+        } else {
+            entity.item = stack.copyWithCount(count - amount)
+        }
+
+        credit(player, progress, BigInteger.valueOf(amount.toLong()))
+    }
+
+    fun onInventoryChange(player: ServerPlayer, stack: ItemStack) {
+        if (!state.active) return
+        if (stack.item !== ModConfig.item && !stack.has(DataComponents.CONTAINER)) return
+
+        pendingScans += player.uuid
+    }
+
+    fun syncDayEnd(server: MinecraftServer, timeLeft: Long): Boolean {
+        if (!state.active) return false
+
+        state.elapsedMillis = ModConfig.config.dayInterval - timeLeft
+        save(server)
+        return true
+    }
+
+    fun collectAll(server: MinecraftServer) {
+        server.playerList.players.forEach { collect(it) }
     }
 
     fun tick(server: MinecraftServer) {
@@ -114,37 +163,44 @@ object Challenge {
             if (!state.active) return
         }
 
-        ticks++
-
-        if (ticks % (ModConfig.config.scanIntervalSeconds * 20) == 0) {
-            server.playerList.players.forEach { collect(it) }
-            if (dirty) save(server)
+        if (pendingScans.isNotEmpty()) {
+            val players = pendingScans.mapNotNull { server.playerList.getPlayer(it) }
+            pendingScans.clear()
+            players.forEach { collect(it) }
         }
 
-        if (ticks % SAVE_INTERVAL_TICKS == 0) save(server)
+        ticks++
+
+        if (ticks % SAVE_INTERVAL_TICKS == 0 || (dirty && ticks % DIRTY_SAVE_INTERVAL_TICKS == 0)) save(server)
     }
 
-    fun collect(player: ServerPlayer): BigInteger {
-        if (!state.active) return BigInteger.ZERO
+    private fun pendingProgress(player: ServerPlayer): PlayerProgress? {
+        if (!state.active) return null
 
-        val progress = state.players[player.uuid] ?: return BigInteger.ZERO
-        if (progress.eliminated || isComplete(progress)) return BigInteger.ZERO
+        val progress = state.players[player.uuid] ?: return null
+        if (progress.eliminated || isComplete(progress)) return null
 
+        return progress
+    }
+
+    private fun collect(player: ServerPlayer) {
+        val progress = pendingProgress(player) ?: return
+        val taken = ItemCollector.take(player, ModConfig.item, quota - progress.collected)
+
+        if (taken.signum() > 0) credit(player, progress, taken)
+    }
+
+    private fun credit(player: ServerPlayer, progress: PlayerProgress, amount: BigInteger) {
         val config = ModConfig.config
-        val item = config.resolveItem() ?: return BigInteger.ZERO
         val quota = quota
 
-        val taken = ItemCollector.take(player, item, quota - progress.collected)
-        if (taken.signum() == 0) return taken
-
-        progress.collected += taken
+        progress.collected += amount
         dirty = true
 
         if (config.actionBar) player.sendOverlayMessage(Messages.progress(progress.collected, quota))
         if (config.messages) player.sendSystemMessage(Messages.progress(progress.collected, quota))
 
         if (progress.collected >= quota) complete(player, progress)
-        return taken
     }
 
     private fun complete(player: ServerPlayer, progress: PlayerProgress) {
@@ -169,6 +225,7 @@ object Challenge {
         server.playerList.broadcastSystemMessage(Messages.dayStart(day, ModConfig.config.totalDays, quota), false)
         ChallengeEvents.DAY_START.invoker().onDayStart(server, day)
 
+        collectAll(server)
         save(server)
     }
 

@@ -15,8 +15,12 @@ class WheatAndChessboardMod : ModInitializer {
     override fun onInitialize() {
         ModConfig.load()
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register { _, _ -> ModConfig.load() }
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register { server, _, _ -> Challenge.collectAll(server) }
 
-        ServerLifecycleEvents.SERVER_STARTED.register { Challenge.load(it) }
+        ServerLifecycleEvents.SERVER_STARTED.register {
+            ModConfig.load()
+            Challenge.load(it)
+        }
         ServerLifecycleEvents.SERVER_STOPPING.register { Challenge.save(it) }
         ServerTickEvents.END_SERVER_TICK.register { Challenge.tick(it) }
         ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> Challenge.onJoin(handler.player) }

@@ -12,7 +12,6 @@ data class ChallengeConfig(
     val totalDays: Int = 14,
     val actionBar: Boolean = true,
     val messages: Boolean = false,
-    val scanIntervalSeconds: Int = 2,
     val reminderIntervalSeconds: Int = 3600,
     val countdownSeconds: List<Int> = listOf(),
     val onDayComplete: Map<String, List<String>> = mapOf(),

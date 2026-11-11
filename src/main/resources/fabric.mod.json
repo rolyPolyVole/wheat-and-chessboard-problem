@@ -13,6 +13,9 @@
             "dev.rolypolyvole.wheatandchessboard.WheatAndChessboardMod"
         ]
     },
+    "mixins": [
+        "wheat_and_chessboard.mixins.json"
+    ],
     "depends": {
         "fabricloader": ">=${loader_version}",
         "fabric-language-kotlin": ">=${kotlin_loader_version}",

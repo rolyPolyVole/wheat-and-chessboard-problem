@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import dev.rolypolyvole.wheatandchessboard.WheatAndChessboardMod
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Items
 import java.nio.file.Files
 import kotlin.io.path.exists
 import kotlin.io.path.readText
@@ -28,6 +30,9 @@ object ModConfig {
     var config = defaultConfig()
         private set
 
+    var item: Item = Items.WHEAT
+        private set
+
     fun load() {
         val loaded = try {
             if (path.exists()) {
@@ -49,6 +54,7 @@ object ModConfig {
         }
 
         config = loaded
+        item = loaded.resolveItem() ?: Items.WHEAT
         Quota.clear()
     }
 
@@ -62,7 +68,6 @@ object ModConfig {
         if (config.resolveItem() == null) problems += "Unknown item: ${config.item}"
         if (config.dayInterval < 1000) problems += "dayInterval has to be at least 1000 milliseconds"
         if (config.totalDays < 1) problems += "totalDays cannot be less than 1"
-        if (config.scanIntervalSeconds < 1) problems += "scanIntervalSeconds cannot be less than 1"
         if (config.reminderIntervalSeconds < 0) problems += "reminderIntervalSeconds cannot be negative"
         if (config.countdownSeconds.orEmpty().any { it < 1 }) problems += "countdownSeconds cannot contain values less than 1"
 
