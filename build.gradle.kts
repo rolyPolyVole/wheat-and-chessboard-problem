@@ -23,6 +23,8 @@ dependencies {
 
     implementation("com.ezylang:EvalEx:${project.property("evalex_version")}")
     include("com.ezylang:EvalEx:${project.property("evalex_version")}")
+
+    testImplementation(kotlin("test"))
 }
 
 tasks.processResources {
@@ -41,4 +43,8 @@ tasks.jar {
     from("LICENSE.txt") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
