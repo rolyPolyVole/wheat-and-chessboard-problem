@@ -5,7 +5,8 @@
     "compatibilityLevel": "JAVA_25",
     "mixins": [
         "InventoryChangeTriggerMixin",
-        "ItemEntityMixin"
+        "ItemEntityMixin",
+        "MinecraftServerMixin"
     ],
     "injectors": {
         "defaultRequire": 1

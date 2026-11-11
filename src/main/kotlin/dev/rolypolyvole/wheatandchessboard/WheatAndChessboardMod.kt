@@ -5,7 +5,6 @@ import dev.rolypolyvole.wheatandchessboard.command.ChessboardCommand
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,8 +20,8 @@ class WheatAndChessboardMod : ModInitializer {
             ModConfig.load()
             Challenge.load(it)
         }
+
         ServerLifecycleEvents.SERVER_STOPPING.register { Challenge.save(it) }
-        ServerTickEvents.END_SERVER_TICK.register { Challenge.tick(it) }
         ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> Challenge.onJoin(handler.player) }
 
         ChessboardCommand.register()
