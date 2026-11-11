@@ -1,0 +1,18 @@
+{
+    "item": "minecraft:wheat",
+    "function": "2^(t-1)",
+    "dayInterval": 86400000,
+    "totalDays": 14,
+    "actionBar": true,
+    "messages": false,
+    "scanIntervalSeconds": 2,
+    "reminderIntervalSeconds": 3600,
+    "countdownSeconds": [600, 300, 60, 30, 10, 5, 4, 3, 2, 1],
+    "onDayComplete": {
+        "default": []
+    },
+    "onDayFail": {
+        "default": []
+    },
+    "onChallengeComplete": []
+}

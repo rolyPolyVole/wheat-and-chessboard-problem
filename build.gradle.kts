@@ -20,6 +20,9 @@ dependencies {
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+
+    implementation("com.ezylang:EvalEx:${project.property("evalex_version")}")
+    include("com.ezylang:EvalEx:${project.property("evalex_version")}")
 }
 
 tasks.processResources {
