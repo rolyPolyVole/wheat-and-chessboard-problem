@@ -24,13 +24,19 @@ class InfoCommand {
             return 0
         }
 
-        val messages = ModConfig.config.messages
         val progress = source.player?.let { state.players[it.uuid] }
+
+        if (progress == null) {
+            source.sendFailure(Component.literal("You are not in the challenge."))
+            return 0
+        }
+
+        val messages = ModConfig.config.messages
         val placeholders = challenge.placeholders(progress)
 
         send(source, messages?.info, placeholders)
 
-        if (progress?.eliminated == true) send(source, messages?.infoEliminated, placeholders)
+        if (progress.eliminated) send(source, messages?.infoEliminated, placeholders)
 
         return Command.SINGLE_SUCCESS
     }
