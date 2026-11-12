@@ -24,6 +24,15 @@ dependencies {
     implementation("com.ezylang:EvalEx:${project.property("evalex_version")}")
     include("com.ezylang:EvalEx:${project.property("evalex_version")}")
 
+    implementation("net.kyori:adventure-text-minimessage:${project.property("adventure_version")}")
+    implementation("net.kyori:adventure-text-serializer-gson:${project.property("adventure_version")}")
+
+    listOf("api", "key", "text-minimessage", "text-serializer-commons", "text-serializer-gson", "text-serializer-json").forEach {
+        include("net.kyori:adventure-$it:${project.property("adventure_version")}")
+    }
+
+    include("net.kyori:option:${project.property("kyori_option_version")}")
+
     testImplementation(kotlin("test"))
 }
 
