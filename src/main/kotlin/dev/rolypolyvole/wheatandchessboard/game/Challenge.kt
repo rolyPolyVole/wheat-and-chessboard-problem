@@ -197,23 +197,19 @@ class Challenge(private val server: MinecraftServer) {
                 continue
             }
 
-            if (ticks == 0) collect(player)
+            if (ticks == 0) {
+                state.players[uuid]?.let { deliverPending(player, it) }
+                collect(player)
+            }
 
-            if (ticks < JOIN_MESSAGE_TICKS) {
+            if (ticks < JOIN_REMINDER_TICKS) {
                 joins[uuid] = ticks + 1
                 continue
             }
 
             joins.remove(uuid)
-            greet(player)
+            pendingProgress(player)?.let { send(player, messages?.reminder, placeholders(it)) }
         }
-    }
-
-    private fun greet(player: ServerPlayer) {
-        val progress = state.players[player.uuid] ?: return
-
-        deliverPending(player, progress)
-        pendingProgress(player)?.let { send(player, messages?.reminder, placeholders(it)) }
     }
 
     private fun deliverPending(player: ServerPlayer, progress: PlayerProgress) {
@@ -375,7 +371,7 @@ class Challenge(private val server: MinecraftServer) {
         private const val SAVE_INTERVAL_TICKS = 600
         private const val DIRTY_SAVE_INTERVAL_TICKS = 20
         private const val MAX_TICK_MILLIS = 1000L
-        private const val JOIN_MESSAGE_TICKS = 100
+        private const val JOIN_REMINDER_TICKS = 100
 
         @JvmStatic
         var current: Challenge? = null
