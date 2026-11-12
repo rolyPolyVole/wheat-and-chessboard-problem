@@ -49,11 +49,15 @@ object Messages {
         val rest = seconds % 60
 
         return when {
-            hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
-            hours > 0 -> "${hours}h"
-            minutes > 0 && rest > 0 -> "${minutes}m ${rest}s"
-            minutes > 0 -> "${minutes}m"
-            else -> "${rest}s"
+            hours > 0 && minutes > 0 -> "${unit(hours, "hour")} ${unit(minutes, "minute")}"
+            hours > 0 -> unit(hours, "hour")
+            minutes > 0 && rest > 0 -> "${unit(minutes, "minute")} ${unit(rest, "second")}"
+            minutes > 0 -> unit(minutes, "minute")
+            else -> unit(rest, "second")
         }
+    }
+
+    private fun unit(amount: Long, name: String): String {
+        return if (amount == 1L) "1 $name" else "$amount ${name}s"
     }
 }
