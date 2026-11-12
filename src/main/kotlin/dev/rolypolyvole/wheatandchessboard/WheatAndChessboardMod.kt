@@ -1,6 +1,6 @@
 package dev.rolypolyvole.wheatandchessboard
 
-import dev.rolypolyvole.wheatandchessboard.challenge.Challenge
+import dev.rolypolyvole.wheatandchessboard.game.Challenge
 import dev.rolypolyvole.wheatandchessboard.command.Commands
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import net.fabricmc.api.ModInitializer

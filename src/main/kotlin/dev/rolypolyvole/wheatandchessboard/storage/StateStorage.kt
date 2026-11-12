@@ -1,4 +1,4 @@
-package dev.rolypolyvole.wheatandchessboard.challenge
+package dev.rolypolyvole.wheatandchessboard.storage
 
 import com.google.gson.FormattingStyle
 import com.google.gson.GsonBuilder

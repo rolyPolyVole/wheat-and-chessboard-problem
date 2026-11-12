@@ -4,6 +4,7 @@ import com.google.gson.FormattingStyle
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import dev.rolypolyvole.wheatandchessboard.WheatAndChessboardMod
+import dev.rolypolyvole.wheatandchessboard.util.Quota
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Items

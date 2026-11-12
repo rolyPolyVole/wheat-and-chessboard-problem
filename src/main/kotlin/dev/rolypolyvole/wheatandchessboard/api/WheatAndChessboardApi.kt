@@ -1,8 +1,8 @@
 package dev.rolypolyvole.wheatandchessboard.api
 
-import dev.rolypolyvole.wheatandchessboard.challenge.Challenge
+import dev.rolypolyvole.wheatandchessboard.game.Challenge
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
-import dev.rolypolyvole.wheatandchessboard.config.Quota
+import dev.rolypolyvole.wheatandchessboard.util.Quota
 import java.math.BigInteger
 import java.util.UUID
 

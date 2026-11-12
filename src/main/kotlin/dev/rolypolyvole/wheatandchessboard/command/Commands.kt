@@ -2,8 +2,8 @@ package dev.rolypolyvole.wheatandchessboard.command
 
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
-import dev.rolypolyvole.wheatandchessboard.challenge.Challenge
-import dev.rolypolyvole.wheatandchessboard.challenge.Messages
+import dev.rolypolyvole.wheatandchessboard.game.Challenge
+import dev.rolypolyvole.wheatandchessboard.util.Messages
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.ChatFormatting

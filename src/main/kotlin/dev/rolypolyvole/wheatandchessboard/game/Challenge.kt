@@ -1,8 +1,13 @@
-package dev.rolypolyvole.wheatandchessboard.challenge
+package dev.rolypolyvole.wheatandchessboard.game
 
 import dev.rolypolyvole.wheatandchessboard.api.ChallengeEvents
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
-import dev.rolypolyvole.wheatandchessboard.config.Quota
+import dev.rolypolyvole.wheatandchessboard.storage.ChallengeState
+import dev.rolypolyvole.wheatandchessboard.storage.PlayerProgress
+import dev.rolypolyvole.wheatandchessboard.storage.StateStorage
+import dev.rolypolyvole.wheatandchessboard.util.ItemCollector
+import dev.rolypolyvole.wheatandchessboard.util.Messages
+import dev.rolypolyvole.wheatandchessboard.util.Quota
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.ItemEntity

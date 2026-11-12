@@ -1,4 +1,4 @@
-package dev.rolypolyvole.wheatandchessboard.challenge
+package dev.rolypolyvole.wheatandchessboard.util
 
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import net.minecraft.ChatFormatting

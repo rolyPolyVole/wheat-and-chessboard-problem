@@ -1,4 +1,4 @@
-package dev.rolypolyvole.wheatandchessboard.config
+package dev.rolypolyvole.wheatandchessboard.util
 
 import java.math.BigInteger
 import kotlin.test.Test

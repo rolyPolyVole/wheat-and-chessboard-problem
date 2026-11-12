@@ -1,4 +1,4 @@
-package dev.rolypolyvole.wheatandchessboard.challenge
+package dev.rolypolyvole.wheatandchessboard.game
 
 import dev.rolypolyvole.wheatandchessboard.WheatAndChessboardMod
 import net.minecraft.server.MinecraftServer

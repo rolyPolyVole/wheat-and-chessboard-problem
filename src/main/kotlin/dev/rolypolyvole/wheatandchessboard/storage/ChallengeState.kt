@@ -1,4 +1,4 @@
-package dev.rolypolyvole.wheatandchessboard.challenge
+package dev.rolypolyvole.wheatandchessboard.storage
 
 import java.math.BigInteger
 import java.util.UUID

@@ -1,6 +1,7 @@
-package dev.rolypolyvole.wheatandchessboard.config
+package dev.rolypolyvole.wheatandchessboard.util
 
 import com.ezylang.evalex.Expression
+import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import java.math.BigInteger
 import java.math.RoundingMode
 

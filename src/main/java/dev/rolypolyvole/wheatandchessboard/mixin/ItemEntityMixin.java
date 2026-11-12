@@ -1,6 +1,6 @@
 package dev.rolypolyvole.wheatandchessboard.mixin;
 
-import dev.rolypolyvole.wheatandchessboard.challenge.Challenge;
+import dev.rolypolyvole.wheatandchessboard.game.Challenge;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;

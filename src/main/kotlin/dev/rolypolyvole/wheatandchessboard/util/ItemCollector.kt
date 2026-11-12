@@ -1,4 +1,4 @@
-package dev.rolypolyvole.wheatandchessboard.challenge
+package dev.rolypolyvole.wheatandchessboard.util
 
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item

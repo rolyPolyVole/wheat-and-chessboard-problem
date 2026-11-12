@@ -1,6 +1,6 @@
 package dev.rolypolyvole.wheatandchessboard.mixin;
 
-import dev.rolypolyvole.wheatandchessboard.challenge.Challenge;
+import dev.rolypolyvole.wheatandchessboard.game.Challenge;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
