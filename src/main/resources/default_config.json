@@ -18,8 +18,7 @@
         "reminder": "<gray><time_left> left! You still need <remaining> more <item>.",
         "dayComplete": "<green>You completed day <day>!",
         "dayFail": "<red><player> failed day <day> and is out of the challenge.",
-        "challengeEnd": "<gold>The challenge is over! Survivors: <survivors>",
-        "challengeEndNoSurvivors": "<red>The challenge is over! Nobody survived.",
+        "challengeEnd": "<gold>The challenge is over! There were <red><survivors></red> survivors.",
         "info": "<gray>Day <day>, <time_left> left. <players_left> of <players_total> players remain.",
         "infoProgress": "<gray><item>: <collected> / <total>",
         "infoEliminated": "<red>You are out of the challenge."

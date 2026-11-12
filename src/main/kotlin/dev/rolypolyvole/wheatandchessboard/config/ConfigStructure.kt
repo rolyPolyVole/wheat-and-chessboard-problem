@@ -38,8 +38,7 @@ data class MessagesConfig(
     val reminder: String? = "<gray><time_left> left! You still need <remaining> more <item>.",
     val dayComplete: String? = "<green>You completed day <day>!",
     val dayFail: String? = "<red><player> failed day <day> and is out of the challenge.",
-    val challengeEnd: String? = "<gold>The challenge is over! Survivors: <survivors>",
-    val challengeEndNoSurvivors: String? = "<red>The challenge is over! Nobody survived.",
+    val challengeEnd: String? = "<gold>The challenge is over! There were <red><survivors></red> survivors.",
     val info: String? = "<gray>Day <day>, <time_left> left. <players_left> of <players_total> players remain.",
     val infoProgress: String? = "<gray><item>: <collected> / <total>",
     val infoEliminated: String? = "<red>You are out of the challenge."

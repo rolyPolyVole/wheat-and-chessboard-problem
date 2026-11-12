@@ -328,11 +328,10 @@ class Challenge(private val server: MinecraftServer) {
 
     private fun finish() {
         val survivors = state.players.filterValues { !it.eliminated }
-        val template = if (survivors.isEmpty()) messages?.challengeEndNoSurvivors else messages?.challengeEnd
 
         state.active = false
 
-        val message = broadcast(template, placeholders() + ("survivors" to survivors.size))
+        val message = broadcast(messages?.challengeEnd, placeholders() + ("survivors" to survivors.size))
         state.players.filterKeys { !isOnline(it) }.values.forEach { queue(it, message) }
 
         survivors.forEach { (uuid, progress) -> reward(uuid, progress, config.onChallengeComplete, state.day) }
