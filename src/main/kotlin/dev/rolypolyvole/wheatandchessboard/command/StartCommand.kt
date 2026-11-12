@@ -1,25 +1,47 @@
 package dev.rolypolyvole.wheatandchessboard.command
 
-import com.mojang.brigadier.arguments.IntegerArgumentType
+import com.mojang.brigadier.Command
+import com.mojang.brigadier.arguments.IntegerArgumentType.getInteger
+import com.mojang.brigadier.arguments.IntegerArgumentType.integer
+import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
+import dev.rolypolyvole.wheatandchessboard.game.Challenge
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.Commands.LEVEL_GAMEMASTERS
+import net.minecraft.commands.Commands.argument
+import net.minecraft.commands.Commands.hasPermission
+import net.minecraft.commands.Commands.literal
+import net.minecraft.network.chat.Component
 
-internal fun startCommand() = command("start") {
-    adminOnly()
-    runs { start(1) }
-
-    argument("day", IntegerArgumentType.integer(1)) {
-        runs { start(IntegerArgumentType.getInteger(this, "day")) }
+class StartCommand {
+    fun build(): LiteralArgumentBuilder<CommandSourceStack> {
+        return literal("start")
+            .requires(hasPermission(LEVEL_GAMEMASTERS))
+            .executes { start(it.source, 1) }
+            .then(
+                argument("day", integer(1))
+                    .executes { start(it.source, getInteger(it, "day")) }
+            )
     }
-}
 
-private fun Context.start(day: Int) {
-    val totalDays = ModConfig.config.totalDays
+    private fun start(source: CommandSourceStack, day: Int): Int {
+        val challenge = Challenge.current ?: return 0
+        val totalDays = ModConfig.config.totalDays
 
-    if (day > totalDays) fail("The challenge only has $totalDays days.")
-    if (!challenge.start(day)) fail("The challenge is already running.")
+        if (day > totalDays) {
+            source.sendFailure(Component.literal("The challenge only has $totalDays days."))
+            return 0
+        }
 
-    val players = challenge.state.players.size
-    val hint = if (players == 0) "Nobody is in it yet, add players with /wheatandchess add." else "$players player(s) are in it."
+        if (!challenge.start(day)) {
+            source.sendFailure(Component.literal("The challenge is already running."))
+            return 0
+        }
 
-    reply("Started the challenge on day $day. $hint")
+        val players = challenge.state.players.size
+        val hint = if (players == 0) "Nobody is in it yet, add players with /wheatandchess add." else "$players player(s) are in it."
+
+        source.sendSuccess({ Component.literal("Started the challenge on day $day. $hint") }, true)
+        return Command.SINGLE_SUCCESS
+    }
 }
