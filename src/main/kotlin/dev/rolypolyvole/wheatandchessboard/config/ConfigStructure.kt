@@ -39,7 +39,6 @@ data class MessagesConfig(
     val dayComplete: String? = "<green>You completed <b>day <day></b>, congrats!",
     val dayFail: String? = "<red><gray><player></gray> failed <b>day <day></b> and is eliminated.",
     val challengeEnd: String? = "<gold><b>The challenge is over!</b> There were <aqua><survivors></aqua> survivors.",
-    val info: String? = "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain",
-    val infoProgress: String? = "<gray>Items collected: <aqua><collected>/<total></gray>",
+    val info: String? = "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain<newline>Items collected: <aqua><collected>/<total>",
     val infoEliminated: String? = "<red>You are out of the challenge."
 )

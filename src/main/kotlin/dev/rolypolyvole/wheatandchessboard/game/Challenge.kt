@@ -40,22 +40,21 @@ class Challenge(private val server: MinecraftServer) {
 
     fun placeholders(progress: PlayerProgress? = null): Map<String, Any> {
         val quota = quota
+        val collected = progress?.collected ?: BigInteger.ZERO
 
         val values = mutableMapOf<String, Any>(
             "item" to Messages.itemName(ModConfig.item),
             "day" to state.day,
             "total_days" to config.totalDays,
             "total" to quota,
+            "collected" to collected,
+            "remaining" to (quota - collected).max(BigInteger.ZERO),
             "time_left" to Messages.duration(timeLeftMillis),
             "players_left" to state.players.values.count { !it.eliminated },
             "players_total" to state.players.size
         )
 
-        if (progress != null) {
-            values["player"] = progress.name
-            values["collected"] = progress.collected
-            values["remaining"] = (quota - progress.collected).max(BigInteger.ZERO)
-        }
+        if (progress != null) values["player"] = progress.name
 
         return values
     }

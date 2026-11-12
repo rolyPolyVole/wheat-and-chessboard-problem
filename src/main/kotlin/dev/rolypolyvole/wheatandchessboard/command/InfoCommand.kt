@@ -30,9 +30,7 @@ class InfoCommand {
 
         send(source, messages?.info, placeholders)
 
-        if (progress != null) {
-            send(source, if (progress.eliminated) messages?.infoEliminated else messages?.infoProgress, placeholders)
-        }
+        if (progress?.eliminated == true) send(source, messages?.infoEliminated, placeholders)
 
         return Command.SINGLE_SUCCESS
     }

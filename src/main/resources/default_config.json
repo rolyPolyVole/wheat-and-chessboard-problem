@@ -19,8 +19,7 @@
         "dayComplete": "<green>You completed <b>day <day></b>, congrats!",
         "dayFail": "<red><gray><player></gray> failed <b>day <day></b> and is eliminated.",
         "challengeEnd": "<gold><b>The challenge is over!</b> There were <aqua><survivors></aqua> survivors.",
-        "info": "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain",
-        "infoProgress": "<gray>Items collected: <aqua><collected>/<total></gray>",
+        "info": "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain<newline>Items collected: <aqua><collected>/<total>",
         "infoEliminated": "<red>You are out of the challenge."
     }
 }
