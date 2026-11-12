@@ -13,13 +13,13 @@
     },
     "onChallengeComplete": [],
     "messages": {
-        "progressActionBar": "<gray>Items collected: <aqua><collected>/<total></gray>",
-        "dayStart": "<gray><b>Day <day></b> has begun! Collect <gold><total>x <item></gold>.</gray>",
-        "reminder": "<gray><b><red><time_left> left!</red></b> You still need <aqua><remaining></aqua>x more <gold><item></gold>.",
-        "dayComplete": "<green>You completed <b>day <day></b>, congrats!",
-        "dayFail": "<red><gray><player></gray> failed <b>day <day></b> and is eliminated.",
-        "challengeEnd": "<gold><b>The challenge is over!</b> There were <aqua><survivors></aqua> survivors.",
-        "info": "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain<newline>Items collected: <aqua><collected>/<total>",
-        "infoEliminated": "<red>You are out of the challenge."
+        "progressActionBar": "<gray>Items collected: <aqua><collected>/<total></aqua></gray>",
+        "dayStart": "<gray><b>Day <day></b> has begun! Collect <aqua><total></aqua>x <gold><item></gold>.</gray>",
+        "reminder": "<gray><b><red><time_left> left!</red></b> You still need <aqua><remaining></aqua>x more <gold><item></gold>.</gray>",
+        "dayComplete": "<green>You completed <b>day <day></b>, congrats!</green>",
+        "dayFail": "<red><gray><player></gray> failed <b>day <day></b> and is eliminated.</red>",
+        "challengeEnd": "<gold><b>The challenge is over!</b> There were <aqua><survivors></aqua> survivors.</gold>",
+        "info": "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain<newline>Items collected: <aqua><collected>/<total></aqua></gray>",
+        "infoEliminated": "<red>You are out of the challenge.</red>"
     }
 }
