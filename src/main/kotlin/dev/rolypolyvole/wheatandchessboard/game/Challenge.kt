@@ -43,7 +43,7 @@ class Challenge(private val server: MinecraftServer) {
             "item" to Messages.itemName(ModConfig.item),
             "day" to state.day,
             "total_days" to config.totalDays,
-            "quota" to quota,
+            "total" to quota,
             "time_left" to Messages.duration(timeLeftMillis),
             "players_left" to state.players.values.count { !it.eliminated },
             "players_total" to state.players.size

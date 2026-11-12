@@ -13,18 +13,18 @@
     },
     "onChallengeComplete": [],
     "messages": {
-        "progressActionBar": "<yellow><item>: <collected> / <quota>",
+        "progressActionBar": "<yellow><item>: <collected> / <total>",
         "progressChat": null,
         "joinPending": "<gold>Day <day> of <total_days>: <yellow>you need <remaining> more <item>. <time_left> left.",
         "joinComplete": "<gold>Day <day> of <total_days>: <green>you have met the quota. <gray><time_left> until the next day.",
-        "dayStart": "<gold>Day <day> of <total_days> has begun! Collect <quota> <item>.",
+        "dayStart": "<gold>Day <day> of <total_days> has begun! Collect <total> <item>.",
         "reminder": "<red><time_left> left! You still need <remaining> more <item>.",
         "dayComplete": "<green>You completed day <day>!",
         "dayFail": "<red><player> failed day <day> and is out of the challenge.",
         "challengeEnd": "<gold>The challenge is over! Survivors: <survivors>",
         "challengeEndNoSurvivors": "<gold>The challenge is over! Nobody survived.",
         "info": "<gold>Day <day> of <total_days>, <time_left> left. <players_left> of <players_total> players remain.",
-        "infoProgress": "<yellow><item>: <collected> / <quota>",
+        "infoProgress": "<yellow><item>: <collected> / <total>",
         "infoEliminated": "<red>You are out of the challenge."
     }
 }
