@@ -1,13 +1,13 @@
 package dev.rolypolyvole.wheatandchessboard.game
 
 import dev.rolypolyvole.wheatandchessboard.api.ChallengeEvents
+import dev.rolypolyvole.wheatandchessboard.config.ChallengeConfig
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import dev.rolypolyvole.wheatandchessboard.storage.ChallengeState
 import dev.rolypolyvole.wheatandchessboard.storage.PlayerProgress
 import dev.rolypolyvole.wheatandchessboard.storage.StateStorage
 import dev.rolypolyvole.wheatandchessboard.util.ItemCollector
 import dev.rolypolyvole.wheatandchessboard.util.Messages
-import dev.rolypolyvole.wheatandchessboard.util.Quota
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.ItemEntity
@@ -15,39 +15,29 @@ import net.minecraft.world.item.ItemStack
 import java.math.BigInteger
 import java.util.UUID
 
-@Suppress("UselessCallOnNotNull")
-object Challenge {
-    private const val SAVE_INTERVAL_TICKS = 600
-    private const val DIRTY_SAVE_INTERVAL_TICKS = 20
-    private const val MAX_TICK_MILLIS = 1000L
-
-    var state = ChallengeState()
-        private set
+class Challenge(private val server: MinecraftServer) {
+    val state: ChallengeState = StateStorage.load(server)
 
     private val pendingScans = LinkedHashSet<UUID>()
     private var lastTickMillis = 0L
     private var ticks = 0
     private var dirty = false
 
+    private val config: ChallengeConfig
+        get() = ModConfig.config
+
     val quota: BigInteger
-        get() = Quota.forDay(state.day)
+        get() = ModConfig.quota.forDay(state.day)
 
     val timeLeftMillis: Long
-        get() = (ModConfig.config.dayInterval - state.elapsedMillis).coerceAtLeast(0)
+        get() = (config.dayInterval - state.elapsedMillis).coerceAtLeast(0)
 
-    fun load(server: MinecraftServer) {
-        state = StateStorage.load(server)
-        pendingScans.clear()
-        lastTickMillis = 0
-        dirty = false
-    }
-
-    fun save(server: MinecraftServer) {
+    fun save() {
         StateStorage.save(server, state)
         dirty = false
     }
 
-    fun start(server: MinecraftServer, day: Int): Boolean {
+    fun start(day: Int): Boolean {
         if (state.active) return false
 
         state.active = true
@@ -59,19 +49,19 @@ object Challenge {
             it.eliminated = false
         }
 
-        beginDay(server)
+        beginDay()
         return true
     }
 
-    fun end(server: MinecraftServer): Boolean {
+    fun end(): Boolean {
         if (!state.active) return false
 
         state.active = false
-        save(server)
+        save()
         return true
     }
 
-    fun add(server: MinecraftServer, player: ServerPlayer): Boolean {
+    fun add(player: ServerPlayer): Boolean {
         val existing = state.players[player.uuid]
         if (existing != null && !existing.eliminated) return false
 
@@ -83,16 +73,24 @@ object Challenge {
         }
 
         collect(player)
-        save(server)
+        save()
         return true
     }
 
-    fun remove(server: MinecraftServer, name: String): Boolean {
+    fun remove(name: String): Boolean {
         val entry = state.players.entries.firstOrNull { it.value.name.equals(name, ignoreCase = true) }
         if (entry == null) return false
 
         state.players.remove(entry.key)
-        save(server)
+        save()
+        return true
+    }
+
+    fun syncDayEnd(timeLeft: Long): Boolean {
+        if (!state.active) return false
+
+        state.elapsedMillis = config.dayInterval - timeLeft
+        save()
         return true
     }
 
@@ -107,7 +105,7 @@ object Challenge {
         if (!state.active || progress.eliminated) return
 
         collect(player)
-        player.sendSystemMessage(Messages.status(state.day, ModConfig.config.totalDays, progress.collected, quota, timeLeftMillis))
+        player.sendSystemMessage(Messages.status(state.day, config.totalDays, progress.collected, quota, timeLeftMillis))
     }
 
     fun onPickup(player: ServerPlayer, entity: ItemEntity) {
@@ -137,19 +135,11 @@ object Challenge {
         pendingScans += player.uuid
     }
 
-    fun syncDayEnd(server: MinecraftServer, timeLeft: Long): Boolean {
-        if (!state.active) return false
-
-        state.elapsedMillis = ModConfig.config.dayInterval - timeLeft
-        save(server)
-        return true
-    }
-
-    fun collectAll(server: MinecraftServer) {
+    fun collectAll() {
         server.playerList.players.forEach { collect(it) }
     }
 
-    fun tick(server: MinecraftServer) {
+    fun tick() {
         val now = System.nanoTime() / 1_000_000
         val delta = if (lastTickMillis == 0L) 0 else (now - lastTickMillis).coerceIn(0, MAX_TICK_MILLIS)
         lastTickMillis = now
@@ -158,24 +148,25 @@ object Challenge {
 
         val before = timeLeftMillis
         state.elapsedMillis += delta
-        val after = timeLeftMillis
+        sendReminders(before, timeLeftMillis)
 
-        sendReminders(server, before, after)
-
-        if (state.elapsedMillis >= ModConfig.config.dayInterval) {
-            endDay(server)
+        if (state.elapsedMillis >= config.dayInterval) {
+            endDay()
             if (!state.active) return
         }
 
-        if (pendingScans.isNotEmpty()) {
-            val players = pendingScans.mapNotNull { server.playerList.getPlayer(it) }
-            pendingScans.clear()
-            players.forEach { collect(it) }
-        }
-
+        collectPending()
         ticks++
 
-        if (ticks % SAVE_INTERVAL_TICKS == 0 || (dirty && ticks % DIRTY_SAVE_INTERVAL_TICKS == 0)) save(server)
+        if (ticks % SAVE_INTERVAL_TICKS == 0 || (dirty && ticks % DIRTY_SAVE_INTERVAL_TICKS == 0)) save()
+    }
+
+    private fun collectPending() {
+        if (pendingScans.isEmpty()) return
+
+        val players = pendingScans.mapNotNull { server.playerList.getPlayer(it) }
+        pendingScans.clear()
+        players.forEach { collect(it) }
     }
 
     private fun pendingProgress(player: ServerPlayer): PlayerProgress? {
@@ -195,7 +186,6 @@ object Challenge {
     }
 
     private fun credit(player: ServerPlayer, progress: PlayerProgress, amount: BigInteger) {
-        val config = ModConfig.config
         val quota = quota
 
         progress.collected += amount
@@ -212,11 +202,11 @@ object Challenge {
         progress.completedDay = day
 
         player.sendSystemMessage(Messages.dayComplete(day))
-        Rewards.run(player.level().server, ModConfig.config.dayCompleteCommands(day), progress.name, day)
+        Rewards.run(server, config.dayCompleteCommands(day), progress.name, day)
         ChallengeEvents.DAY_COMPLETE.invoker().onDayComplete(player, day)
     }
 
-    private fun beginDay(server: MinecraftServer) {
+    private fun beginDay() {
         val day = state.day
         val quota = quota
 
@@ -226,15 +216,15 @@ object Challenge {
             state.players.values.filter { !it.eliminated }.forEach { it.completedDay = day }
         }
 
-        server.playerList.broadcastSystemMessage(Messages.dayStart(day, ModConfig.config.totalDays, quota), false)
+        server.playerList.broadcastSystemMessage(Messages.dayStart(day, config.totalDays, quota), false)
         ChallengeEvents.DAY_START.invoker().onDayStart(server, day)
 
-        collectAll(server)
-        save(server)
+        collectAll()
+        save()
     }
 
-    private fun endDay(server: MinecraftServer) {
-        val config = ModConfig.config
+    private fun endDay() {
+        val config = config
         val day = state.day
 
         for ((uuid, progress) in state.players) {
@@ -249,27 +239,27 @@ object Challenge {
         state.elapsedMillis = (state.elapsedMillis - config.dayInterval).coerceIn(0, config.dayInterval - 1)
 
         if (day >= config.totalDays) {
-            finish(server)
+            finish()
             return
         }
 
         state.day = day + 1
-        beginDay(server)
+        beginDay()
     }
 
-    private fun finish(server: MinecraftServer) {
+    private fun finish() {
         val survivors = state.players.filterValues { !it.eliminated }
 
         state.active = false
         server.playerList.broadcastSystemMessage(Messages.challengeEnd(survivors.values.map { it.name }), false)
-        survivors.values.forEach { Rewards.run(server, ModConfig.config.onChallengeComplete, it.name, state.day) }
+        survivors.values.forEach { Rewards.run(server, config.onChallengeComplete, it.name, state.day) }
         ChallengeEvents.CHALLENGE_END.invoker().onChallengeEnd(server, survivors.keys.toSet())
 
-        save(server)
+        save()
     }
 
-    private fun sendReminders(server: MinecraftServer, before: Long, after: Long) {
-        val timeLeft = reminderCrossed(before, after) ?: return
+    private fun sendReminders(before: Long, after: Long) {
+        val timeLeft = Reminders.crossed(config, before, after) ?: return
         val quota = quota
 
         for (player in server.playerList.players) {
@@ -280,21 +270,22 @@ object Challenge {
         }
     }
 
-    private fun reminderCrossed(before: Long, after: Long): Long? {
-        if (after <= 0 || before == after) return null
+    companion object {
+        private const val SAVE_INTERVAL_TICKS = 600
+        private const val DIRTY_SAVE_INTERVAL_TICKS = 20
+        private const val MAX_TICK_MILLIS = 1000L
 
-        val config = ModConfig.config
+        @JvmStatic
+        var current: Challenge? = null
+            private set
 
-        val countdown = config.countdownSeconds.orEmpty()
-            .map { it * 1000L }
-            .filter { it in after until before }
-            .minOrNull()
+        fun open(server: MinecraftServer) {
+            current = Challenge(server)
+        }
 
-        if (countdown != null) return countdown
-
-        val interval = config.reminderIntervalSeconds * 1000L
-        if (interval <= 0 || (before - 1) / interval == (after - 1) / interval) return null
-
-        return (before - 1) / interval * interval
+        fun close() {
+            current?.save()
+            current = null
+        }
     }
 }

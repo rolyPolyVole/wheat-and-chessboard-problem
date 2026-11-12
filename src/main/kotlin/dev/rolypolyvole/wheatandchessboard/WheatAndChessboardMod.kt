@@ -1,8 +1,8 @@
 package dev.rolypolyvole.wheatandchessboard
 
-import dev.rolypolyvole.wheatandchessboard.game.Challenge
 import dev.rolypolyvole.wheatandchessboard.command.Commands
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
+import dev.rolypolyvole.wheatandchessboard.game.Challenge
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
@@ -14,15 +14,15 @@ class WheatAndChessboardMod : ModInitializer {
     override fun onInitialize() {
         ModConfig.load()
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register { _, _ -> ModConfig.load() }
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register { server, _, _ -> Challenge.collectAll(server) }
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register { _, _, _ -> Challenge.current?.collectAll() }
 
         ServerLifecycleEvents.SERVER_STARTED.register {
             ModConfig.load()
-            Challenge.load(it)
+            Challenge.open(it)
         }
 
-        ServerLifecycleEvents.SERVER_STOPPING.register { Challenge.save(it) }
-        ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> Challenge.onJoin(handler.player) }
+        ServerLifecycleEvents.SERVER_STOPPING.register { Challenge.close() }
+        ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> Challenge.current?.onJoin(handler.player) }
 
         Commands.register()
 

@@ -34,6 +34,9 @@ object ModConfig {
     var item: Item = Items.WHEAT
         private set
 
+    var quota = Quota(config.function)
+        private set
+
     fun load() {
         val loaded = try {
             if (path.exists()) {
@@ -56,7 +59,7 @@ object ModConfig {
 
         config = loaded
         item = loaded.resolveItem() ?: Items.WHEAT
-        Quota.clear()
+        quota = Quota(loaded.function)
     }
 
     private fun defaultConfig(): ChallengeConfig {

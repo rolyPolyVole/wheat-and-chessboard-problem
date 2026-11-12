@@ -15,6 +15,7 @@ public abstract class MinecraftServerMixin {
     // Fabric's tick events do not fire while a dedicated server is paused for being empty, the head of tickServer does
     @Inject(method = "tickServer", at = @At("HEAD"))
     private void tickChallenge(BooleanSupplier haveTime, CallbackInfo ci) {
-        Challenge.INSTANCE.tick((MinecraftServer) (Object) this);
+        Challenge challenge = Challenge.getCurrent();
+        if (challenge != null) challenge.tick();
     }
 }

@@ -1,40 +1,45 @@
 package dev.rolypolyvole.wheatandchessboard.api
 
-import dev.rolypolyvole.wheatandchessboard.game.Challenge
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
-import dev.rolypolyvole.wheatandchessboard.util.Quota
+import dev.rolypolyvole.wheatandchessboard.game.Challenge
+import dev.rolypolyvole.wheatandchessboard.storage.PlayerProgress
 import java.math.BigInteger
 import java.util.UUID
 
 @Suppress("unused")
 object WheatAndChessboardApi {
-    @JvmStatic
-    fun isActive(): Boolean = Challenge.state.active
+    private val challenge: Challenge?
+        get() = Challenge.current
+
+    private fun progress(player: UUID): PlayerProgress? = challenge?.state?.players?.get(player)
 
     @JvmStatic
-    fun currentDay(): Int = Challenge.state.day
+    fun isActive(): Boolean = challenge?.state?.active ?: false
+
+    @JvmStatic
+    fun currentDay(): Int = challenge?.state?.day ?: 0
 
     @JvmStatic
     fun totalDays(): Int = ModConfig.config.totalDays
 
     @JvmStatic
-    fun quota(day: Int): BigInteger = Quota.forDay(day)
+    fun quota(day: Int): BigInteger = ModConfig.quota.forDay(day)
 
     @JvmStatic
-    fun timeLeftMillis(): Long = Challenge.timeLeftMillis
+    fun timeLeftMillis(): Long = challenge?.timeLeftMillis ?: 0
 
     @JvmStatic
-    fun participants(): Set<UUID> = Challenge.state.players.keys.toSet()
+    fun participants(): Set<UUID> = challenge?.state?.players?.keys?.toSet() ?: setOf()
 
     @JvmStatic
-    fun isParticipant(player: UUID): Boolean = player in Challenge.state.players
+    fun isParticipant(player: UUID): Boolean = progress(player) != null
 
     @JvmStatic
-    fun isEliminated(player: UUID): Boolean = Challenge.state.players[player]?.eliminated ?: false
+    fun isEliminated(player: UUID): Boolean = progress(player)?.eliminated ?: false
 
     @JvmStatic
-    fun collected(player: UUID): BigInteger = Challenge.state.players[player]?.collected ?: BigInteger.ZERO
+    fun collected(player: UUID): BigInteger = progress(player)?.collected ?: BigInteger.ZERO
 
     @JvmStatic
-    fun hasCompletedToday(player: UUID): Boolean = Challenge.state.players[player]?.let { Challenge.isComplete(it) } ?: false
+    fun hasCompletedToday(player: UUID): Boolean = progress(player)?.let { challenge?.isComplete(it) } ?: false
 }

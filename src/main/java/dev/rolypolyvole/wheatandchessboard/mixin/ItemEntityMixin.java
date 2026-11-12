@@ -23,11 +23,13 @@ public abstract class ItemEntityMixin {
 
     @Inject(method = "playerTouch", at = @At("HEAD"), cancellable = true)
     private void collectChallengeItem(Player player, CallbackInfo ci) {
-        if (!(player instanceof ServerPlayer serverPlayer)) return;
+        Challenge challenge = Challenge.getCurrent();
+
+        if (challenge == null || !(player instanceof ServerPlayer serverPlayer)) return;
         if (pickupDelay != 0 || (target != null && !target.equals(player.getUUID()))) return;
 
         ItemEntity entity = (ItemEntity) (Object) this;
-        Challenge.INSTANCE.onPickup(serverPlayer, entity);
+        challenge.onPickup(serverPlayer, entity);
 
         if (entity.isRemoved()) ci.cancel();
     }

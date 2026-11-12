@@ -15,6 +15,7 @@ public abstract class InventoryChangeTriggerMixin {
 
     @Inject(method = "trigger", at = @At("HEAD"))
     private void collectChallengeItem(ServerPlayer player, Inventory inventory, ItemStack stack, CallbackInfo ci) {
-        Challenge.INSTANCE.onInventoryChange(player, stack);
+        Challenge challenge = Challenge.getCurrent();
+        if (challenge != null) challenge.onInventoryChange(player, stack);
     }
 }
