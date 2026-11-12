@@ -1,5 +1,6 @@
 package dev.rolypolyvole.wheatandchessboard.util
 
+import com.google.gson.JsonElement
 import com.mojang.serialization.JsonOps
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
@@ -19,6 +20,14 @@ object Messages {
 
         val tree = json.serializeToTree(parse(template, placeholders))
         return ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, tree).getOrThrow()
+    }
+
+    fun toJson(message: Component): JsonElement {
+        return ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, message).getOrThrow()
+    }
+
+    fun fromJson(message: JsonElement): Component? {
+        return ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, message).result().orElse(null)
     }
 
     fun parse(template: String, placeholders: Map<String, Any>): AdventureComponent {

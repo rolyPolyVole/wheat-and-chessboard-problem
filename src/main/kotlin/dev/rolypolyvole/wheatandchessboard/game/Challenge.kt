@@ -9,6 +9,7 @@ import dev.rolypolyvole.wheatandchessboard.storage.PlayerProgress
 import dev.rolypolyvole.wheatandchessboard.storage.StateStorage
 import dev.rolypolyvole.wheatandchessboard.util.ItemCollector
 import dev.rolypolyvole.wheatandchessboard.util.Messages
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.ItemEntity
@@ -20,6 +21,7 @@ class Challenge(private val server: MinecraftServer) {
     val state: ChallengeState = StateStorage.load(server)
 
     private val pendingScans = LinkedHashSet<UUID>()
+    private val joins = HashMap<UUID, Int>()
     private var lastTickMillis = 0L
     private var ticks = 0
     private var dirty = false
@@ -128,11 +130,7 @@ class Challenge(private val server: MinecraftServer) {
         val progress = state.players[player.uuid] ?: return
         progress.name = player.plainTextName
 
-        if (!state.active || progress.eliminated) return
-
-        collect(player)
-
-        if (!isComplete(progress)) send(player, messages?.reminder, placeholders(progress))
+        joins[player.uuid] = 0
     }
 
     fun onPickup(player: ServerPlayer, entity: ItemEntity) {
@@ -171,6 +169,8 @@ class Challenge(private val server: MinecraftServer) {
         val delta = if (lastTickMillis == 0L) 0 else (now - lastTickMillis).coerceIn(0, MAX_TICK_MILLIS)
         lastTickMillis = now
 
+        tickJoins()
+
         if (!state.active) return
 
         val before = timeLeftMillis
@@ -186,6 +186,62 @@ class Challenge(private val server: MinecraftServer) {
         ticks++
 
         if (ticks % SAVE_INTERVAL_TICKS == 0 || (dirty && ticks % DIRTY_SAVE_INTERVAL_TICKS == 0)) save()
+    }
+
+    private fun tickJoins() {
+        for ((uuid, ticks) in joins.toList()) {
+            val player = server.playerList.getPlayer(uuid)
+
+            if (player == null) {
+                joins.remove(uuid)
+                continue
+            }
+
+            if (ticks == 0) collect(player)
+
+            if (ticks < JOIN_MESSAGE_TICKS) {
+                joins[uuid] = ticks + 1
+                continue
+            }
+
+            joins.remove(uuid)
+            greet(player)
+        }
+    }
+
+    private fun greet(player: ServerPlayer) {
+        val progress = state.players[player.uuid] ?: return
+
+        deliverPending(player, progress)
+        pendingProgress(player)?.let { send(player, messages?.reminder, placeholders(it)) }
+    }
+
+    private fun deliverPending(player: ServerPlayer, progress: PlayerProgress) {
+        if (progress.pendingMessages.isEmpty() && progress.pendingCommands.isEmpty()) return
+
+        val missed = progress.pendingMessages.mapNotNull { Messages.fromJson(it) }
+        val commands = progress.pendingCommands.toList()
+
+        progress.pendingMessages.clear()
+        progress.pendingCommands.clear()
+        save()
+
+        missed.forEach { player.sendSystemMessage(it) }
+        Rewards.run(server, commands)
+    }
+
+    private fun isOnline(uuid: UUID): Boolean {
+        return server.playerList.getPlayer(uuid) != null
+    }
+
+    private fun reward(uuid: UUID, progress: PlayerProgress, commands: List<String>, day: Int) {
+        val resolved = Rewards.resolve(commands, progress.name, day)
+
+        if (isOnline(uuid)) {
+            Rewards.run(server, resolved)
+        } else {
+            progress.pendingCommands += resolved
+        }
     }
 
     private fun collectPending() {
@@ -226,7 +282,7 @@ class Challenge(private val server: MinecraftServer) {
         progress.completedDay = day
 
         send(player, messages?.dayComplete, placeholders(progress))
-        Rewards.run(server, config.dayCompleteCommands(day), progress.name, day)
+        reward(player.uuid, progress, config.dayCompleteCommands(day), day)
         ChallengeEvents.DAY_COMPLETE.invoker().onDayComplete(player, day)
     }
 
@@ -251,12 +307,15 @@ class Challenge(private val server: MinecraftServer) {
         val config = config
         val day = state.day
 
-        for ((uuid, progress) in state.players) {
+        for ((uuid, progress) in state.players.toList()) {
             if (progress.eliminated || isComplete(progress)) continue
 
             progress.eliminated = true
-            broadcast(messages?.dayFail, placeholders(progress))
-            Rewards.run(server, config.dayFailCommands(day), progress.name, day)
+
+            val message = broadcast(messages?.dayFail, placeholders(progress))
+            if (!isOnline(uuid)) queue(progress, message)
+
+            reward(uuid, progress, config.dayFailCommands(day), day)
             ChallengeEvents.DAY_FAIL.invoker().onDayFail(server, uuid, day)
         }
 
@@ -276,8 +335,11 @@ class Challenge(private val server: MinecraftServer) {
         val template = if (survivors.isEmpty()) messages?.challengeEndNoSurvivors else messages?.challengeEnd
 
         state.active = false
-        broadcast(template, placeholders() + ("survivors" to survivors.values.joinToString(", ") { it.name }))
-        survivors.values.forEach { Rewards.run(server, config.onChallengeComplete, it.name, state.day) }
+
+        val message = broadcast(template, placeholders() + ("survivors" to survivors.values.joinToString(", ") { it.name }))
+        state.players.filterKeys { !isOnline(it) }.values.forEach { queue(it, message) }
+
+        survivors.forEach { (uuid, progress) -> reward(uuid, progress, config.onChallengeComplete, state.day) }
         ChallengeEvents.CHALLENGE_END.invoker().onChallengeEnd(server, survivors.keys.toSet())
 
         save()
@@ -298,14 +360,22 @@ class Challenge(private val server: MinecraftServer) {
         Messages.format(template, placeholders)?.let { player.sendSystemMessage(it) }
     }
 
-    private fun broadcast(template: String?, placeholders: Map<String, Any>) {
-        Messages.format(template, placeholders)?.let { server.playerList.broadcastSystemMessage(it, false) }
+    private fun broadcast(template: String?, placeholders: Map<String, Any>): Component? {
+        val message = Messages.format(template, placeholders) ?: return null
+
+        server.playerList.broadcastSystemMessage(message, false)
+        return message
+    }
+
+    private fun queue(progress: PlayerProgress, message: Component?) {
+        if (message != null) progress.pendingMessages += Messages.toJson(message)
     }
 
     companion object {
         private const val SAVE_INTERVAL_TICKS = 600
         private const val DIRTY_SAVE_INTERVAL_TICKS = 20
         private const val MAX_TICK_MILLIS = 1000L
+        private const val JOIN_MESSAGE_TICKS = 0
 
         @JvmStatic
         var current: Challenge? = null
