@@ -14,13 +14,13 @@
     "onChallengeComplete": [],
     "messages": {
         "progressActionBar": "<gray><item>: <collected> / <total>",
-        "dayStart": "<gray>Day <day> of <total_days> has begun! Collect <total> <item>.",
+        "dayStart": "<gray>Day <day> has begun! Collect <total> <item>.",
         "reminder": "<gray><time_left> left! You still need <remaining> more <item>.",
         "dayComplete": "<green>You completed day <day>!",
         "dayFail": "<red><player> failed day <day> and is out of the challenge.",
         "challengeEnd": "<gold>The challenge is over! Survivors: <survivors>",
         "challengeEndNoSurvivors": "<red>The challenge is over! Nobody survived.",
-        "info": "<gray>Day <day> of <total_days>, <time_left> left. <players_left> of <players_total> players remain.",
+        "info": "<gray>Day <day>, <time_left> left. <players_left> of <players_total> players remain.",
         "infoProgress": "<gray><item>: <collected> / <total>",
         "infoEliminated": "<red>You are out of the challenge."
     }
