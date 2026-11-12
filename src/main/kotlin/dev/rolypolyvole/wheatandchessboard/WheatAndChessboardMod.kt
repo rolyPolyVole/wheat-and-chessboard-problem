@@ -1,7 +1,7 @@
 package dev.rolypolyvole.wheatandchessboard
 
 import dev.rolypolyvole.wheatandchessboard.challenge.Challenge
-import dev.rolypolyvole.wheatandchessboard.command.ChessboardCommand
+import dev.rolypolyvole.wheatandchessboard.command.Commands
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -24,7 +24,7 @@ class WheatAndChessboardMod : ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register { Challenge.save(it) }
         ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> Challenge.onJoin(handler.player) }
 
-        ChessboardCommand.register()
+        Commands.register()
 
         LOGGER.info("Initialized Wheat and Chessboard Problem!")
     }

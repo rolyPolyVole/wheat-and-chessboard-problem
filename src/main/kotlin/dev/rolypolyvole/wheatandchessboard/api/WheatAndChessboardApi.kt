@@ -6,6 +6,7 @@ import dev.rolypolyvole.wheatandchessboard.config.Quota
 import java.math.BigInteger
 import java.util.UUID
 
+@Suppress("unused")
 object WheatAndChessboardApi {
     @JvmStatic
     fun isActive(): Boolean = Challenge.state.active

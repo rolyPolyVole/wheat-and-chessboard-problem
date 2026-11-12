@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeParseException
 
-object ChessboardCommand {
+object Commands {
     private val ADMIN = Commands.hasPermission<CommandSourceStack>(Commands.LEVEL_GAMEMASTERS)
 
     fun register() {
