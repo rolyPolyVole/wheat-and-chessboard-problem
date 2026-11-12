@@ -336,7 +336,7 @@ class Challenge(private val server: MinecraftServer) {
 
         state.active = false
 
-        val message = broadcast(template, placeholders() + ("survivors" to survivors.values.joinToString(", ") { it.name }))
+        val message = broadcast(template, placeholders() + ("survivors" to survivors.size))
         state.players.filterKeys { !isOnline(it) }.values.forEach { queue(it, message) }
 
         survivors.forEach { (uuid, progress) -> reward(uuid, progress, config.onChallengeComplete, state.day) }
