@@ -14,6 +14,14 @@ kotlin {
     jvmToolchain(25)
 }
 
+loom {
+    runs {
+        named("client") {
+            programArgs(listOf("--username", "rolyPolyVole"))
+        }
+    }
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
