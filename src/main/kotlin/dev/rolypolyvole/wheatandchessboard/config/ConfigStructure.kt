@@ -33,14 +33,14 @@ data class ChallengeConfig(
 }
 
 data class MessagesConfig(
-    val progressActionBar: String? = "<yellow><item>: <collected> / <total>",
-    val dayStart: String? = "<gold>Day <day> of <total_days> has begun! Collect <total> <item>.",
-    val reminder: String? = "<red><time_left> left! You still need <remaining> more <item>.",
+    val progressActionBar: String? = "<gray><item>: <collected> / <total>",
+    val dayStart: String? = "<gray>Day <day> of <total_days> has begun! Collect <total> <item>.",
+    val reminder: String? = "<gray><time_left> left! You still need <remaining> more <item>.",
     val dayComplete: String? = "<green>You completed day <day>!",
     val dayFail: String? = "<red><player> failed day <day> and is out of the challenge.",
     val challengeEnd: String? = "<gold>The challenge is over! Survivors: <survivors>",
-    val challengeEndNoSurvivors: String? = "<gold>The challenge is over! Nobody survived.",
-    val info: String? = "<gold>Day <day> of <total_days>, <time_left> left. <players_left> of <players_total> players remain.",
-    val infoProgress: String? = "<yellow><item>: <collected> / <total>",
+    val challengeEndNoSurvivors: String? = "<red>The challenge is over! Nobody survived.",
+    val info: String? = "<gray>Day <day> of <total_days>, <time_left> left. <players_left> of <players_total> players remain.",
+    val infoProgress: String? = "<gray><item>: <collected> / <total>",
     val infoEliminated: String? = "<red>You are out of the challenge."
 )
