@@ -33,13 +33,13 @@ data class ChallengeConfig(
 }
 
 data class MessagesConfig(
-    val progressActionBar: String? = "<gray><item>: <collected> / <total>",
-    val dayStart: String? = "<gray>Day <day> has begun! Collect <total> <item>.",
-    val reminder: String? = "<gray><time_left> left! You still need <remaining> more <item>.",
-    val dayComplete: String? = "<green>You completed day <day>!",
-    val dayFail: String? = "<red><player> failed day <day> and is out of the challenge.",
-    val challengeEnd: String? = "<gold>The challenge is over! There were <red><survivors></red> survivors.",
-    val info: String? = "<gray>Day <day>, <time_left> left. <players_left> of <players_total> players remain.",
-    val infoProgress: String? = "<gray><item>: <collected> / <total>",
+    val progressActionBar: String? = "<gray>Items collected: <aqua><collected>/<total></gray>",
+    val dayStart: String? = "<gray><b>Day <day></b> has begun! Collect <gold><total>x <item></gold>.</gray>",
+    val reminder: String? = "<gray><b><red><time_left> left!</red></b> You still need <aqua><remaining></aqua>x more <gold><item></gold>.",
+    val dayComplete: String? = "<green>You completed <b>day <day></b>, congrats!",
+    val dayFail: String? = "<red><gray><player></gray> failed <b>day <day></b> and is eliminated.",
+    val challengeEnd: String? = "<gold><b>The challenge is over!</b> There were <aqua><survivors></aqua> survivors.",
+    val info: String? = "<gray>Info on: <b>Day <day></b><newline><green><players_left></green>/<yellow><players_total></yellow> players left<newline><red><b><time_left></b></red> remain",
+    val infoProgress: String? = "<gray>Items collected: <aqua><collected>/<total></gray>",
     val infoEliminated: String? = "<red>You are out of the challenge."
 )
