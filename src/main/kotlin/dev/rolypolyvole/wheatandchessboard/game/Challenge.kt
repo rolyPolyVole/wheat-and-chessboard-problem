@@ -80,11 +80,16 @@ class Challenge(private val server: MinecraftServer) {
         return true
     }
 
-    fun end(): Boolean {
+    fun end(abort: Boolean): Boolean {
         if (!state.active) return false
 
-        state.active = false
-        save()
+        if (abort) {
+            state.active = false
+            save()
+        } else {
+            finish()
+        }
+
         return true
     }
 

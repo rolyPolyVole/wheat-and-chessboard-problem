@@ -13,18 +13,24 @@ class EndCommand {
     fun build(): LiteralArgumentBuilder<CommandSourceStack> {
         return literal("end")
             .requires(hasPermission(LEVEL_GAMEMASTERS))
-            .executes { end(it.source) }
+            .executes { end(it.source, false) }
+            .then(
+                literal("abort")
+                    .executes { end(it.source, true) }
+            )
     }
 
-    private fun end(source: CommandSourceStack): Int {
+    private fun end(source: CommandSourceStack, abort: Boolean): Int {
         val challenge = Challenge.current ?: return 0
 
-        if (!challenge.end()) {
+        if (!challenge.end(abort)) {
             source.sendFailure(Component.literal("No challenge is running."))
             return 0
         }
 
-        source.sendSuccess({ Component.literal("Ended the challenge.") }, true)
+        val reply = if (abort) "Aborted the challenge." else "Ended the challenge."
+
+        source.sendSuccess({ Component.literal(reply) }, true)
         return Command.SINGLE_SUCCESS
     }
 }
