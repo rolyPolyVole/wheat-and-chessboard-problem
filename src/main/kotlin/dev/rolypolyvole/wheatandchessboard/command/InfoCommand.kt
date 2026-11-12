@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import dev.rolypolyvole.wheatandchessboard.game.Challenge
 import dev.rolypolyvole.wheatandchessboard.util.Messages
-import net.minecraft.ChatFormatting
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands.literal
 import net.minecraft.network.chat.Component
@@ -25,23 +24,20 @@ class InfoCommand {
             return 0
         }
 
-        val remaining = state.players.values.count { !it.eliminated }
-        val timeLeft = Messages.duration(challenge.timeLeftMillis)
+        val messages = ModConfig.config.messages
+        val progress = source.player?.let { state.players[it.uuid] }
+        val placeholders = challenge.placeholders(progress)
 
-        source.sendSuccess({
-            Component.literal("Day ${state.day} of ${ModConfig.config.totalDays}, $timeLeft left. ")
-                .append(Component.literal("$remaining of ${state.players.size} players remain."))
-                .withStyle(ChatFormatting.GOLD)
-        }, false)
+        send(source, messages?.info, placeholders)
 
-        val progress = source.player?.let { state.players[it.uuid] } ?: return Command.SINGLE_SUCCESS
-
-        if (progress.eliminated) {
-            source.sendSuccess({ Component.literal("You are out of the challenge.").withStyle(ChatFormatting.RED) }, false)
-        } else {
-            source.sendSuccess({ Messages.progress(progress.collected, challenge.quota) }, false)
+        if (progress != null) {
+            send(source, if (progress.eliminated) messages?.infoEliminated else messages?.infoProgress, placeholders)
         }
 
         return Command.SINGLE_SUCCESS
+    }
+
+    private fun send(source: CommandSourceStack, template: String?, placeholders: Map<String, Any>) {
+        Messages.format(template, placeholders)?.let { message -> source.sendSuccess({ message }, false) }
     }
 }

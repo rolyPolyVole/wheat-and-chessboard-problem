@@ -4,6 +4,7 @@ import com.google.gson.FormattingStyle
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import dev.rolypolyvole.wheatandchessboard.WheatAndChessboardMod
+import dev.rolypolyvole.wheatandchessboard.util.Messages
 import dev.rolypolyvole.wheatandchessboard.util.Quota
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.world.item.Item
@@ -81,6 +82,22 @@ object ModConfig {
             problems += "Invalid function \"${config.function}\": ${e.message}"
         }
 
+        for ((name, template) in messageTemplates(config)) {
+            try {
+                Messages.format(template, mapOf())
+            } catch (e: Exception) {
+                problems += "Invalid message \"$name\": ${e.message}"
+            }
+        }
+
         return problems
+    }
+
+    private fun messageTemplates(config: ChallengeConfig): Map<String, String> {
+        val messages = config.messages ?: return mapOf()
+
+        return gson.toJsonTree(messages).asJsonObject.entrySet()
+            .filter { !it.value.isJsonNull }
+            .associate { it.key to it.value.asString }
     }
 }

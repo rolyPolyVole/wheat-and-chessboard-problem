@@ -10,13 +10,12 @@ data class ChallengeConfig(
     val function: String = "2^(t-1)",
     val dayInterval: Long = 86_400_000,
     val totalDays: Int = 14,
-    val actionBar: Boolean = true,
-    val messages: Boolean = false,
     val reminderIntervalSeconds: Int = 3600,
     val countdownSeconds: List<Int> = listOf(),
     val onDayComplete: Map<String, List<String>> = mapOf(),
     val onDayFail: Map<String, List<String>> = mapOf(),
-    val onChallengeComplete: List<String> = listOf()
+    val onChallengeComplete: List<String> = listOf(),
+    val messages: MessagesConfig? = MessagesConfig()
 ) {
     fun resolveItem(): Item? {
         val id = Identifier.tryParse(item.orEmpty()) ?: return null
@@ -32,3 +31,19 @@ data class ChallengeConfig(
         return map[day.toString()] ?: map["default"] ?: listOf()
     }
 }
+
+data class MessagesConfig(
+    val progressActionBar: String? = "<yellow><item>: <collected> / <quota>",
+    val progressChat: String? = null,
+    val joinPending: String? = "<gold>Day <day> of <total_days>: <yellow>you need <remaining> more <item>. <time_left> left.",
+    val joinComplete: String? = "<gold>Day <day> of <total_days>: <green>you have met the quota. <gray><time_left> until the next day.",
+    val dayStart: String? = "<gold>Day <day> of <total_days> has begun! Collect <quota> <item>.",
+    val reminder: String? = "<red><time_left> left! You still need <remaining> more <item>.",
+    val dayComplete: String? = "<green>You completed day <day>!",
+    val dayFail: String? = "<red><player> failed day <day> and is out of the challenge.",
+    val challengeEnd: String? = "<gold>The challenge is over! Survivors: <survivors>",
+    val challengeEndNoSurvivors: String? = "<gold>The challenge is over! Nobody survived.",
+    val info: String? = "<gold>Day <day> of <total_days>, <time_left> left. <players_left> of <players_total> players remain.",
+    val infoProgress: String? = "<yellow><item>: <collected> / <quota>",
+    val infoEliminated: String? = "<red>You are out of the challenge."
+)

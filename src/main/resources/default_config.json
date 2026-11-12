@@ -3,8 +3,6 @@
     "function": "2^(t-1)",
     "dayInterval": 86400000,
     "totalDays": 14,
-    "actionBar": true,
-    "messages": false,
     "reminderIntervalSeconds": 3600,
     "countdownSeconds": [600, 300, 60, 30, 10, 5, 4, 3, 2, 1],
     "onDayComplete": {
@@ -13,5 +11,20 @@
     "onDayFail": {
         "default": []
     },
-    "onChallengeComplete": []
+    "onChallengeComplete": [],
+    "messages": {
+        "progressActionBar": "<yellow><item>: <collected> / <quota>",
+        "progressChat": null,
+        "joinPending": "<gold>Day <day> of <total_days>: <yellow>you need <remaining> more <item>. <time_left> left.",
+        "joinComplete": "<gold>Day <day> of <total_days>: <green>you have met the quota. <gray><time_left> until the next day.",
+        "dayStart": "<gold>Day <day> of <total_days> has begun! Collect <quota> <item>.",
+        "reminder": "<red><time_left> left! You still need <remaining> more <item>.",
+        "dayComplete": "<green>You completed day <day>!",
+        "dayFail": "<red><player> failed day <day> and is out of the challenge.",
+        "challengeEnd": "<gold>The challenge is over! Survivors: <survivors>",
+        "challengeEndNoSurvivors": "<gold>The challenge is over! Nobody survived.",
+        "info": "<gold>Day <day> of <total_days>, <time_left> left. <players_left> of <players_total> players remain.",
+        "infoProgress": "<yellow><item>: <collected> / <quota>",
+        "infoEliminated": "<red>You are out of the challenge."
+    }
 }

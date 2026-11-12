@@ -2,6 +2,7 @@ package dev.rolypolyvole.wheatandchessboard.game
 
 import dev.rolypolyvole.wheatandchessboard.api.ChallengeEvents
 import dev.rolypolyvole.wheatandchessboard.config.ChallengeConfig
+import dev.rolypolyvole.wheatandchessboard.config.MessagesConfig
 import dev.rolypolyvole.wheatandchessboard.config.ModConfig
 import dev.rolypolyvole.wheatandchessboard.storage.ChallengeState
 import dev.rolypolyvole.wheatandchessboard.storage.PlayerProgress
@@ -26,11 +27,36 @@ class Challenge(private val server: MinecraftServer) {
     private val config: ChallengeConfig
         get() = ModConfig.config
 
+    private val messages: MessagesConfig?
+        get() = config.messages
+
     val quota: BigInteger
         get() = ModConfig.quota.forDay(state.day)
 
     val timeLeftMillis: Long
         get() = (config.dayInterval - state.elapsedMillis).coerceAtLeast(0)
+
+    fun placeholders(progress: PlayerProgress? = null): Map<String, Any> {
+        val quota = quota
+
+        val values = mutableMapOf<String, Any>(
+            "item" to Messages.itemName(ModConfig.item),
+            "day" to state.day,
+            "total_days" to config.totalDays,
+            "quota" to quota,
+            "time_left" to Messages.duration(timeLeftMillis),
+            "players_left" to state.players.values.count { !it.eliminated },
+            "players_total" to state.players.size
+        )
+
+        if (progress != null) {
+            values["player"] = progress.name
+            values["collected"] = progress.collected
+            values["remaining"] = (quota - progress.collected).max(BigInteger.ZERO)
+        }
+
+        return values
+    }
 
     fun save() {
         StateStorage.save(server, state)
@@ -105,7 +131,9 @@ class Challenge(private val server: MinecraftServer) {
         if (!state.active || progress.eliminated) return
 
         collect(player)
-        player.sendSystemMessage(Messages.status(state.day, config.totalDays, progress.collected, quota, timeLeftMillis))
+
+        val template = if (isComplete(progress)) messages?.joinComplete else messages?.joinPending
+        send(player, template, placeholders(progress))
     }
 
     fun onPickup(player: ServerPlayer, entity: ItemEntity) {
@@ -186,13 +214,13 @@ class Challenge(private val server: MinecraftServer) {
     }
 
     private fun credit(player: ServerPlayer, progress: PlayerProgress, amount: BigInteger) {
-        val quota = quota
-
         progress.collected += amount
         dirty = true
 
-        if (config.actionBar) player.sendOverlayMessage(Messages.progress(progress.collected, quota))
-        if (config.messages) player.sendSystemMessage(Messages.progress(progress.collected, quota))
+        val values = placeholders(progress)
+
+        Messages.format(messages?.progressActionBar, values)?.let { player.sendOverlayMessage(it) }
+        send(player, messages?.progressChat, values)
 
         if (progress.collected >= quota) complete(player, progress)
     }
@@ -201,7 +229,7 @@ class Challenge(private val server: MinecraftServer) {
         val day = state.day
         progress.completedDay = day
 
-        player.sendSystemMessage(Messages.dayComplete(day))
+        send(player, messages?.dayComplete, placeholders(progress))
         Rewards.run(server, config.dayCompleteCommands(day), progress.name, day)
         ChallengeEvents.DAY_COMPLETE.invoker().onDayComplete(player, day)
     }
@@ -216,7 +244,7 @@ class Challenge(private val server: MinecraftServer) {
             state.players.values.filter { !it.eliminated }.forEach { it.completedDay = day }
         }
 
-        server.playerList.broadcastSystemMessage(Messages.dayStart(day, config.totalDays, quota), false)
+        broadcast(messages?.dayStart, placeholders())
         ChallengeEvents.DAY_START.invoker().onDayStart(server, day)
 
         collectAll()
@@ -231,7 +259,7 @@ class Challenge(private val server: MinecraftServer) {
             if (progress.eliminated || isComplete(progress)) continue
 
             progress.eliminated = true
-            server.playerList.broadcastSystemMessage(Messages.dayFail(progress.name, day), false)
+            broadcast(messages?.dayFail, placeholders(progress))
             Rewards.run(server, config.dayFailCommands(day), progress.name, day)
             ChallengeEvents.DAY_FAIL.invoker().onDayFail(server, uuid, day)
         }
@@ -249,9 +277,10 @@ class Challenge(private val server: MinecraftServer) {
 
     private fun finish() {
         val survivors = state.players.filterValues { !it.eliminated }
+        val template = if (survivors.isEmpty()) messages?.challengeEndNoSurvivors else messages?.challengeEnd
 
         state.active = false
-        server.playerList.broadcastSystemMessage(Messages.challengeEnd(survivors.values.map { it.name }), false)
+        broadcast(template, placeholders() + ("survivors" to survivors.values.joinToString(", ") { it.name }))
         survivors.values.forEach { Rewards.run(server, config.onChallengeComplete, it.name, state.day) }
         ChallengeEvents.CHALLENGE_END.invoker().onChallengeEnd(server, survivors.keys.toSet())
 
@@ -260,14 +289,21 @@ class Challenge(private val server: MinecraftServer) {
 
     private fun sendReminders(before: Long, after: Long) {
         val timeLeft = Reminders.crossed(config, before, after) ?: return
-        val quota = quota
 
         for (player in server.playerList.players) {
             val progress = state.players[player.uuid] ?: continue
             if (progress.eliminated || isComplete(progress)) continue
 
-            player.sendSystemMessage(Messages.reminder(timeLeft, progress.collected, quota))
+            send(player, messages?.reminder, placeholders(progress) + ("time_left" to Messages.duration(timeLeft)))
         }
+    }
+
+    private fun send(player: ServerPlayer, template: String?, placeholders: Map<String, Any>) {
+        Messages.format(template, placeholders)?.let { player.sendSystemMessage(it) }
+    }
+
+    private fun broadcast(template: String?, placeholders: Map<String, Any>) {
+        Messages.format(template, placeholders)?.let { server.playerList.broadcastSystemMessage(it, false) }
     }
 
     companion object {
