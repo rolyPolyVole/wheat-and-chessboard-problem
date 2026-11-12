@@ -375,7 +375,7 @@ class Challenge(private val server: MinecraftServer) {
         private const val SAVE_INTERVAL_TICKS = 600
         private const val DIRTY_SAVE_INTERVAL_TICKS = 20
         private const val MAX_TICK_MILLIS = 1000L
-        private const val JOIN_MESSAGE_TICKS = 0
+        private const val JOIN_MESSAGE_TICKS = 100
 
         @JvmStatic
         var current: Challenge? = null
