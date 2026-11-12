@@ -132,8 +132,7 @@ class Challenge(private val server: MinecraftServer) {
 
         collect(player)
 
-        val template = if (isComplete(progress)) messages?.joinComplete else messages?.joinPending
-        send(player, template, placeholders(progress))
+        if (!isComplete(progress)) send(player, messages?.reminder, placeholders(progress))
     }
 
     fun onPickup(player: ServerPlayer, entity: ItemEntity) {
@@ -217,10 +216,7 @@ class Challenge(private val server: MinecraftServer) {
         progress.collected += amount
         dirty = true
 
-        val values = placeholders(progress)
-
-        Messages.format(messages?.progressActionBar, values)?.let { player.sendOverlayMessage(it) }
-        send(player, messages?.progressChat, values)
+        Messages.format(messages?.progressActionBar, placeholders(progress))?.let { player.sendOverlayMessage(it) }
 
         if (progress.collected >= quota) complete(player, progress)
     }

@@ -14,9 +14,6 @@
     "onChallengeComplete": [],
     "messages": {
         "progressActionBar": "<yellow><item>: <collected> / <total>",
-        "progressChat": null,
-        "joinPending": "<gold>Day <day> of <total_days>: <yellow>you need <remaining> more <item>. <time_left> left.",
-        "joinComplete": "<gold>Day <day> of <total_days>: <green>you have met the quota. <gray><time_left> until the next day.",
         "dayStart": "<gold>Day <day> of <total_days> has begun! Collect <total> <item>.",
         "reminder": "<red><time_left> left! You still need <remaining> more <item>.",
         "dayComplete": "<green>You completed day <day>!",

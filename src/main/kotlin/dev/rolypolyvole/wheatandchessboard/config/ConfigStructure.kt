@@ -34,9 +34,6 @@ data class ChallengeConfig(
 
 data class MessagesConfig(
     val progressActionBar: String? = "<yellow><item>: <collected> / <total>",
-    val progressChat: String? = null,
-    val joinPending: String? = "<gold>Day <day> of <total_days>: <yellow>you need <remaining> more <item>. <time_left> left.",
-    val joinComplete: String? = "<gold>Day <day> of <total_days>: <green>you have met the quota. <gray><time_left> until the next day.",
     val dayStart: String? = "<gold>Day <day> of <total_days> has begun! Collect <total> <item>.",
     val reminder: String? = "<red><time_left> left! You still need <remaining> more <item>.",
     val dayComplete: String? = "<green>You completed day <day>!",
