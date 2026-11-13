@@ -5,7 +5,7 @@ import dev.rolypolyvole.wheatandchessboard.config.ChallengeConfig
 @Suppress("UselessCallOnNotNull")
 object Reminders {
     fun crossed(config: ChallengeConfig, before: Long, after: Long): Long? {
-        if (after <= 0 || before <= after) return null
+        if (after !in 1..<before) return null
 
         val countdown = config.countdownSeconds.orEmpty()
             .map { it * 1000L }
